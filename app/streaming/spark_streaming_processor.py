@@ -59,6 +59,7 @@ def create_spark_session():
         SparkSession.builder.appName(settings.spark_app_name)
         .master(settings.spark_master_url)
         .config("spark.jars.packages", settings.spark_kafka_package)
+        .config("spark.jars.ivy", "/tmp/.ivy2")
         .config("spark.sql.shuffle.partitions", "2")
         .config("spark.streaming.stopGracefullyOnShutdown", "true")
         .config("spark.cassandra.connection.host", ",".join(settings.cassandra_hosts))
@@ -316,7 +317,7 @@ def start_streaming() -> None:
         .start()
     )
     processed_topic_query = write_processed_events_to_kafka(events)
-
+#kafka topic masi spark e ka validu, processed events
     logger.info(
         "Spark Streaming started | kafka=%s raw_topic=%s cassandra_keyspace=%s",
         settings.kafka_bootstrap_servers,

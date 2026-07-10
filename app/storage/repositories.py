@@ -35,7 +35,7 @@ class ParkingRepository:
             parking_id, spot_id, event_ts, event_id, zone_id, gateway_id, sensor_id,
             occupied, distance_cm, battery_level, signal_strength, event_type,
             classification_label, anomaly_label, anomaly_score, raw_json
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
         self.session.execute(
             query,
@@ -64,7 +64,7 @@ class ParkingRepository:
         INSERT INTO sensor_metadata_by_id (
             parking_id, sensor_id, spot_id, zone_id, gateway_id, sensor_type, unit,
             installed_at, firmware_version, status
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
         self.session.execute(
             query,
@@ -94,7 +94,7 @@ class ParkingRepository:
             parking_id, spot_id, zone_id, last_update, sensor_id, gateway_id, occupied,
             distance_cm, battery_level, signal_strength, event_type,
             classification_label, anomaly_label, anomaly_score, last_sequence_no
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
         self.session.execute(
             query,
@@ -127,13 +127,13 @@ class ParkingRepository:
     ) -> None:
         query = """
         UPDATE current_spot_status
-        SET classification_label = ?, anomaly_label = ?, anomaly_score = ?
-        WHERE parking_id = ? AND spot_id = ?
+        SET classification_label = %s, anomaly_label = %s, anomaly_score = %s
+        WHERE parking_id = %s AND spot_id = %s
         """
         self.session.execute(query, (classification_label, anomaly_label, anomaly_score, parking_id, spot_id))
 
     def get_current_spot_status(self, parking_id: str) -> list[dict]:
-        query = "SELECT * FROM current_spot_status WHERE parking_id = ?"
+        query = "SELECT * FROM current_spot_status WHERE parking_id = %s"
         rows = self.session.execute(query, (parking_id,))
         return list(rows)
 
@@ -143,7 +143,7 @@ class ParkingRepository:
         INSERT INTO parking_summary_by_minute (
             parking_id, bucket_date, minute_ts, occupied_spots, free_spots, occupancy_rate,
             predicted_occupancy_rate, price_eur, price_tier
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
         self.session.execute(
             query,
@@ -166,7 +166,7 @@ class ParkingRepository:
         INSERT INTO sensor_window_metrics_by_minute (
             parking_id, bucket_date, window_start, window_end, event_count,
             occupied_event_count, avg_distance_cm, avg_battery_level, weak_signal_count
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
         self.session.execute(
             query,
@@ -192,7 +192,7 @@ class ParkingRepository:
         query = """
         INSERT INTO ai_results_by_time (
             parking_id, ai_type, bucket_date, generated_at, entity_id, label, score, json_payload
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         """
         self.session.execute(
             query,
@@ -212,8 +212,8 @@ class ParkingRepository:
         bucket_date = day or date.today()
         query = """
         SELECT * FROM ai_results_by_time
-        WHERE parking_id = ? AND ai_type = ? AND bucket_date = ?
-        LIMIT ?
+        WHERE parking_id = %s AND ai_type = %s AND bucket_date = %s
+        LIMIT %s
         """
         rows = self.session.execute(query, (parking_id, ai_type, bucket_date, limit))
         return list(rows)
@@ -223,7 +223,7 @@ class ParkingRepository:
         query = """
         INSERT INTO alerts_by_time (
             parking_id, bucket_date, generated_at, entity_id, alert_type, severity, message, score
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         """
         self.session.execute(
             query,
@@ -243,8 +243,8 @@ class ParkingRepository:
         bucket_date = day or date.today()
         query = """
         SELECT * FROM alerts_by_time
-        WHERE parking_id = ? AND bucket_date = ?
-        LIMIT ?
+        WHERE parking_id = %s AND bucket_date = %s
+        LIMIT %s
         """
         rows = self.session.execute(query, (parking_id, bucket_date, limit))
         return list(rows)
@@ -252,8 +252,8 @@ class ParkingRepository:
     def get_recent_events_for_spot(self, parking_id: str, spot_id: str, limit: int = 20) -> list[dict]:
         query = """
         SELECT * FROM sensor_events_by_spot
-        WHERE parking_id = ? AND spot_id = ?
-        LIMIT ?
+        WHERE parking_id = %s AND spot_id = %s
+        LIMIT %s
         """
         rows = self.session.execute(query, (parking_id, spot_id, limit))
         return list(rows)

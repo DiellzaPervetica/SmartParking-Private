@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 
 from app.utils.time_utils import utc_now
 
@@ -19,6 +19,8 @@ class HealthService:
             if (row.get("signal_strength") or -999) < -85:
                 weak_signal += 1
             last_update = row.get("last_update")
+            if isinstance(last_update, datetime) and last_update.tzinfo is None:
+                last_update = last_update.replace(tzinfo=timezone.utc)
             if last_update and now - last_update > timedelta(minutes=5):
                 stale += 1
 

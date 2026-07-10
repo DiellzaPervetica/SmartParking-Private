@@ -36,7 +36,9 @@
 11. [Si ta nis projektin](#si-ta-nis-projektin)
 12. [Si ta ndalosh](#si-ta-ndalosh)
 13. [Si ta testosh projektin](#si-ta-testosh-projektin)
-14. [Anëtarët e grupit](#anëtarët-e-grupit)
+14. [Verifikimi live i pipeline-it](#verifikimi-live-i-pipeline-it)
+15. [Pamjet teknike të rekomanduara për raport](#pamjet-teknike-të-rekomanduara-për-raport)
+16. [Anëtarët e grupit](#anëtarët-e-grupit)
 
 ---
 
@@ -73,6 +75,8 @@ Smart Parking Prishtina eshte nje projekt IoT per lenden *Internet of Things*. P
 | Komponentet e avancuara AI | Po | `app/ai/prediction.py`, `app/ai/anomaly_detection.py`, `app/ai/classification.py`, `app/ai/dynamic_pricing.py` | Prediction, classification, anomaly detection dhe pricing. |
 | Sistemi i alarmimeve | Po | `alerts_by_time`, `parking.sensor-alerts`, `/ai/alerts/latest` | Alarmet gjenerohen nga anomalite dhe validimet. |
 | Analiza e performances dhe optimizimi | Po | `scripts/benchmark_pipeline.py`, checkpointing, `spark.sql.shuffle.partitions=2` | Ka benchmark lokal dhe tuning per demo/prototip. |
+
+## Hapat sipas PDF-se
 
 ### 1. Zgjedhja e domenit IoT
 
@@ -348,6 +352,28 @@ python -m scripts.benchmark_pipeline
 - `smoke_test` kontrollon nese API-ja eshte gjalle.
 - `verify_live_pipeline` dergon nje event testues ne MQTT, verifikon qe ai event arrin ne Cassandra pas perpunimit nga Spark Streaming dhe kontrollon qe dashboard-i po lexon nga burimi live.
 - `benchmark_pipeline` mat throughput-in lokal per validim dhe ML pa I/O te rrjetit.
+
+## Verifikimi live i pipeline-it
+
+Kur Docker stack, gateway, Spark Streaming, simulatori dhe API jane duke punuar, ekzekuto:
+
+```bash
+python -m scripts.verify_live_pipeline
+```
+
+- dergon nje probe event per `P01` ne MQTT me `sequence_no` unik;
+- pret derisa Spark ta perpunoj eventin dhe Cassandra ta kete `last_sequence_no` te njejte;
+- kontrollon qe dashboard-i te ktheje `source = cassandra_spark_streaming`, pra te dhena live dhe jo fallback.
+
+## Pamjet teknike të rekomanduara për raport
+
+Per raport ose mbrojtje, merri manualisht keto pamje si evidence teknike:
+
+- Docker containers duke punuar;
+- Kafka topics te krijuara;
+- query ne Cassandra per `current_spot_status`;
+- terminal logs per simulatorin, gateway dhe Spark Streaming;
+- dashboard-i duke shfaqur burimin `LIVE: Kafka → Spark Streaming → Cassandra`.
 
 ## Anëtarët e grupit
 

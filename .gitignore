@@ -3,6 +3,7 @@
 !.env.example
 
 .venv/
+.venv*/
 venv/
 env/
 

@@ -65,8 +65,9 @@ def wait_until_cassandra_has_probe(sequence_no: int) -> dict[str, Any]:
     last_error: str | None = None
 
     while time.time() - start < TIMEOUT_SECONDS:
-        repository = ParkingRepository()
+        repository: ParkingRepository | None = None
         try:
+            repository = ParkingRepository()
             rows = repository.get_current_spot_status(settings.parking_id)
             probe_row = next(
                 (row for row in rows if row.get("spot_id") == PROBE_SPOT_ID),
@@ -81,7 +82,8 @@ def wait_until_cassandra_has_probe(sequence_no: int) -> dict[str, Any]:
             last_error = str(exc)
 
         finally:
-            repository.close()
+            if repository is not None:
+                repository.close()
 
         time.sleep(POLL_SECONDS)
 
